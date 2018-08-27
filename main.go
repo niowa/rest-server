@@ -8,7 +8,6 @@ import (
 	"rest-server/src/middleware"
 	"rest-server/src/api/profile"
 	"rest-server/src/api/session"
-	"rest-server/src/ethereum"
 )
 
 type SelectUser struct {
@@ -21,7 +20,7 @@ type TokenRequest struct {
 
 func main() {
 	postgres.ConnectToDb()
-	ethereum.ConnectToEthereum()
+	//ethereum.ConnectToEthereum()
 	router := mux.NewRouter()
 	router.Use(middleware.AuthMiddleware)
 	router.HandleFunc("/profile", profile.GetProfile).Methods("GET")
