@@ -23,12 +23,6 @@ type Token struct {
 	Token string `json:"token"`
 }
 
-type UserForResopnse struct {
-	Id string
-	Email string
-	Name string
-}
-
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	user := UserForResponse{
 		Id: context.Get(r, "id"),
@@ -49,7 +43,11 @@ func CreateProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user postgres.User
-	err = postgres.Db.Model(&user).Where("email = ?", parsedBody.Email).Select()
+
+	db := postgres.ConnectToDb()
+	defer db.Close()
+
+	err = db.Model(&user).Where("email = ?", parsedBody.Email).Select()
 
 	if err == nil {
 		log.Println("already had user")
@@ -69,7 +67,7 @@ func CreateProfile(w http.ResponseWriter, r *http.Request) {
 		Password: hashedPassword,
 	}
 
-	err = postgres.Db.Insert(newUser)
+	err = db.Insert(newUser)
 	if err != nil {
 		http.Error(w, "User was not added", http.StatusBadRequest)
 		return

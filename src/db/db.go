@@ -9,13 +9,19 @@ type User struct {
 	Password string
 }
 
-var Db *pg.DB
+//func ConnectToDb() {
+//	Db = pg.Connect(&pg.Options{
+//		User: "postgres",
+//		Password: "root",
+//		Database: "go",
+//	})
+//	//defer db.Close()
+//}
 
-func ConnectToDb() {
-	Db = pg.Connect(&pg.Options{
+func ConnectToDb() *pg.DB {
+	return pg.Connect(&pg.Options{
 		User: "postgres",
 		Password: "root",
 		Database: "go",
 	})
-	//defer db.Close()
 }

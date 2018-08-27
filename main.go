@@ -1,7 +1,6 @@
 package main
 
 import (
-	postgres "rest-server/src/db"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -19,12 +18,17 @@ type TokenRequest struct {
 }
 
 func main() {
-	postgres.ConnectToDb()
 	//ethereum.ConnectToEthereum()
+	router := Router()
+	log.Fatal(http.ListenAndServe(":8000", router))
+}
+
+func Router() *mux.Router {
 	router := mux.NewRouter()
 	router.Use(middleware.AuthMiddleware)
 	router.HandleFunc("/profile", profile.GetProfile).Methods("GET")
 	router.HandleFunc("/profile", profile.CreateProfile).Methods("POST")
 	router.HandleFunc("/session", session.CreateSession).Methods("POST")
-	log.Fatal(http.ListenAndServe(":8000", router))
+
+	return router
 }

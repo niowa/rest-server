@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"log"
 	"github.com/gorilla/context"
 	postgres "rest-server/src/db"
 )
@@ -27,7 +26,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		log.Println("next")
+
 		tokenString := r.Header.Get("x-access-token")
 
 		token, err := jwt.ParseWithClaims(tokenString, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -40,10 +39,12 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		log.Println("Executing middlewareTwo again")
 		if claims, ok := token.Claims.(*TokenClaims); ok && token.Valid {
+			db := postgres.ConnectToDb()
+			defer db.Close()
+
 			var user postgres.User
-			err = postgres.Db.Model(&user).Where("id = ?", claims.Id).Select()
+			err = db.Model(&user).Where("id = ?", claims.Id).Select()
 			if err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				fmt.Println(err)
@@ -56,7 +57,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		} else {
 			w.WriteHeader(http.StatusUnauthorized)
-			fmt.Println(err)
 			return
 		}
 	})

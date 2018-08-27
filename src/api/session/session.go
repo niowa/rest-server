@@ -21,11 +21,15 @@ func CreateSession(w http.ResponseWriter, r *http.Request)  {
 	var parsedBody postgres.User
 	err := body.Decode(&parsedBody)
 	if err != nil {
-		panic(err)
+		http.Error(w, "Invalid", http.StatusUnauthorized)
 	}
 
 	var user postgres.User
-	err = postgres.Db.Model(&user).Where("email = ?", parsedBody.Email).Select()
+
+	db := postgres.ConnectToDb()
+	defer db.Close()
+
+	err = db.Model(&user).Where("email = ?", parsedBody.Email).Select()
 
 	if err != nil {
 		log.Println("Invalid user")
