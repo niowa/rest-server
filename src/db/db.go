@@ -9,19 +9,18 @@ type User struct {
 	Password string
 }
 
-//func ConnectToDb() {
-//	Db = pg.Connect(&pg.Options{
-//		User: "postgres",
-//		Password: "root",
-//		Database: "go",
-//	})
-//	//defer db.Close()
-//}
-
 func ConnectToDb() *pg.DB {
 	return pg.Connect(&pg.Options{
 		User: "postgres",
 		Password: "root",
 		Database: "go",
+	})
+}
+
+func ConnectToTestDb() *pg.DB {
+	return pg.Connect(&pg.Options{
+		User: "postgres",
+		Password: "root",
+		Database: "go_test",
 	})
 }
