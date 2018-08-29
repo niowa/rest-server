@@ -23,18 +23,13 @@ type Token struct {
 	Token string `json:"token"`
 }
 
-type UserForResopnse struct {
-	Id string
-	Email string
-	Name string
-}
-
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	user := UserForResponse{
 		Id: context.Get(r, "id"),
 		Name: context.Get(r, "name"),
 		Email: context.Get(r, "email"),
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
 }
@@ -43,13 +38,17 @@ func CreateProfile(w http.ResponseWriter, r *http.Request) {
 	body := json.NewDecoder(r.Body)
 	var parsedBody postgres.User
 	err := body.Decode(&parsedBody)
-	if err != nil {
+	if err != nil || parsedBody.Password == "" || parsedBody.Name == "" || parsedBody.Email == "" {
 		log.Println("body parser")
-		panic(err)
+		log.Printf("%+v", err)
+		http.Error(w, "Invalid parameters", http.StatusBadRequest)
+		return
 	}
-
 	var user postgres.User
-	err = postgres.Db.Model(&user).Where("email = ?", parsedBody.Email).Select()
+	db := postgres.ConnectToDb()
+	defer db.Close()
+
+	err = db.Model(&user).Where("email = ?", parsedBody.Email).Select()
 
 	if err == nil {
 		log.Println("already had user")
@@ -69,7 +68,7 @@ func CreateProfile(w http.ResponseWriter, r *http.Request) {
 		Password: hashedPassword,
 	}
 
-	err = postgres.Db.Insert(newUser)
+	err = db.Insert(newUser)
 	if err != nil {
 		http.Error(w, "User was not added", http.StatusBadRequest)
 		return

@@ -20,12 +20,16 @@ func CreateSession(w http.ResponseWriter, r *http.Request)  {
 	body := json.NewDecoder(r.Body)
 	var parsedBody postgres.User
 	err := body.Decode(&parsedBody)
-	if err != nil {
-		panic(err)
+	if err != nil || parsedBody.Password == "" || parsedBody.Email == "" {
+		http.Error(w, "Invalid", http.StatusUnauthorized)
 	}
 
 	var user postgres.User
-	err = postgres.Db.Model(&user).Where("email = ?", parsedBody.Email).Select()
+
+	db := postgres.ConnectToDb()
+	defer db.Close()
+
+	err = db.Model(&user).Where("email = ?", parsedBody.Email).Select()
 
 	if err != nil {
 		log.Println("Invalid user")
@@ -48,8 +52,8 @@ func CreateSession(w http.ResponseWriter, r *http.Request)  {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, _ := token.SignedString(middleware.MySigningKey)
+	tokenString, _ := token.SignedString(middleware.MySigningKey)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(Token{ss})
+	json.NewEncoder(w).Encode(Token{tokenString})
 }

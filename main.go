@@ -1,14 +1,10 @@
 package main
 
 import (
-	postgres "rest-server/src/db"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"rest-server/src/middleware"
-	"rest-server/src/api/profile"
-	"rest-server/src/api/session"
-	"rest-server/src/ethereum"
+	"rest-server/routes"
+	"os"
 )
 
 type SelectUser struct {
@@ -20,12 +16,8 @@ type TokenRequest struct {
 }
 
 func main() {
-	postgres.ConnectToDb()
-	ethereum.ConnectToEthereum()
-	router := mux.NewRouter()
-	router.Use(middleware.AuthMiddleware)
-	router.HandleFunc("/profile", profile.GetProfile).Methods("GET")
-	router.HandleFunc("/profile", profile.CreateProfile).Methods("POST")
-	router.HandleFunc("/session", session.CreateSession).Methods("POST")
+	//ethereum.ConnectToEthereum()
+	os.Setenv("ENV", "DEV")
+	router := routes.Router()
 	log.Fatal(http.ListenAndServe(":8000", router))
 }

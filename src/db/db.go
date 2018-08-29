@@ -1,6 +1,9 @@
 package db
 
-import "github.com/go-pg/pg"
+import (
+	"github.com/go-pg/pg"
+	"os"
+)
 
 type User struct {
 	Id string
@@ -9,13 +12,17 @@ type User struct {
 	Password string
 }
 
-var Db *pg.DB
-
-func ConnectToDb() {
-	Db = pg.Connect(&pg.Options{
+func ConnectToDb() *pg.DB {
+	env := os.Getenv("ENV")
+	var database string
+	if (env == "DEV") {
+		database = "go"
+	} else {
+		database = "go_test"
+	}
+	return pg.Connect(&pg.Options{
 		User: "postgres",
 		Password: "root",
-		Database: "go",
+		Database: database,
 	})
-	//defer db.Close()
 }
