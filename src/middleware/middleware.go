@@ -28,7 +28,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		tokenString := r.Header.Get("x-access-token")
-
 		token, err := jwt.ParseWithClaims(tokenString, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(MySigningKey), nil
 		})
@@ -50,6 +49,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 				fmt.Println(err)
 				return
 			}
+
 			context.Set(r, "email", user.Email)
 			context.Set(r, "name", user.Name)
 			context.Set(r, "password", user.Password)

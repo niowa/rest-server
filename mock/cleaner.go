@@ -6,7 +6,7 @@ import (
 )
 
 func CleanDb() {
-	db := postgres.ConnectToTestDb()
+	db := postgres.ConnectToDb()
 	defer db.Close()
 
 	sqlStatment := `

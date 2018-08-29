@@ -29,6 +29,7 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 		Name: context.Get(r, "name"),
 		Email: context.Get(r, "email"),
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
 }
@@ -37,13 +38,13 @@ func CreateProfile(w http.ResponseWriter, r *http.Request) {
 	body := json.NewDecoder(r.Body)
 	var parsedBody postgres.User
 	err := body.Decode(&parsedBody)
-	if err != nil {
+	if err != nil || parsedBody.Password == "" || parsedBody.Name == "" || parsedBody.Email == "" {
 		log.Println("body parser")
-		panic(err)
+		log.Printf("%+v", err)
+		http.Error(w, "Invalid parameters", http.StatusBadRequest)
+		return
 	}
-
 	var user postgres.User
-
 	db := postgres.ConnectToDb()
 	defer db.Close()
 

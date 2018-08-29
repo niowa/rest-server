@@ -52,8 +52,8 @@ func CreateSession(w http.ResponseWriter, r *http.Request)  {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, _ := token.SignedString(middleware.MySigningKey)
+	tokenString, _ := token.SignedString(middleware.MySigningKey)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(Token{ss})
+	json.NewEncoder(w).Encode(Token{tokenString})
 }

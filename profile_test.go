@@ -1,31 +1,39 @@
 package main
 
 import (
+	postgres "rest-server/src/db"
+	"rest-server/routes"
 	"rest-server/mock"
 	"testing"
 	"net/http"
 	"net/http/httptest"
-	"fmt"
+	"github.com/stretchr/testify/assert"
+	"encoding/json"
+	"log"
 )
 
-//func TestProfile(t *testing.T) {
-//	//req, err := http.Get("http://localhost:8000/profile")
-//	//fmt.Printf("%+v\n", req.Status)
-//	//fmt.Printf("%+v\n", err)
-//
-//	request, _ := http.NewRequest("GET", "/create", nil)
-//	response := httptest.NewRecorder()
-//	Router().ServeHTTP(response, request)
-//	assert.Equal(t, 200, response.Code, "OK response is expected")
-//}
-
-func TestProfile(t *testing.T) {
-	user := mock.FillDb()
+func TestGetProfile(t *testing.T) {
+	userData := mock.FillDb()
 	defer mock.CleanDb()
 	request, _ := http.NewRequest("GET", "/profile", nil)
 	response := httptest.NewRecorder()
-	request.Header.Set("x-access-token", user.Token)
-	Router().ServeHTTP(response, request)
-	fmt.Println(response.Code)
+	request.Header.Set("x-access-token", userData.Token)
+	routes.Router().ServeHTTP(response, request)
+
+	var parsedBody postgres.User
+
+	err := json.Unmarshal([]byte(response.Body.String()), &parsedBody)
+	if err != nil {
+		log.Println("body parser")
+		panic(err)
+	}
+
+	userForCompare := postgres.User{
+		Id: userData.User.Id,
+		Name: userData.User.Name,
+		Email: userData.User.Email,
+	}
+
+	assert.Equal(t, userForCompare, parsedBody, "Should return user data")
 }
 
