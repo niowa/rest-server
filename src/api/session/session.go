@@ -20,7 +20,7 @@ func CreateSession(w http.ResponseWriter, r *http.Request)  {
 	body := json.NewDecoder(r.Body)
 	var parsedBody postgres.User
 	err := body.Decode(&parsedBody)
-	if err != nil {
+	if err != nil || parsedBody.Password == "" || parsedBody.Email == "" {
 		http.Error(w, "Invalid", http.StatusUnauthorized)
 	}
 

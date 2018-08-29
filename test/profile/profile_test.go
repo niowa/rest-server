@@ -1,4 +1,4 @@
-package test
+package profile
 
 import (
 	postgres "rest-server/src/db"
@@ -13,11 +13,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type TokenResponse struct {
+type tokenResponse struct {
 	Token string
 }
 
-func TestGet(t *testing.T) {
+func TestProfileGet(t *testing.T) {
 	ok := func() {
 		log.Println("GET OK Test")
 		userData := mock.FillDb()
@@ -69,18 +69,19 @@ func TestGet(t *testing.T) {
 	notPassedToken()
 }
 
-func TestPost(t *testing.T) {
+func TestPorfilePost(t *testing.T) {
 	ok := func() {
 		log.Println("POST OK Test")
 		userData := mock.GenerateUser()
 		defer mock.CleanDb()
+
 		body, err := json.Marshal(userData)
 		request, _ := http.NewRequest("POST", "/profile", bytes.NewBuffer(body))
 		response := httptest.NewRecorder()
 		request.Header.Set("Content-Type", "application/json")
 		routes.Router().ServeHTTP(response, request)
 
-		var parsedBody TokenResponse
+		var parsedBody tokenResponse
 
 		err = json.Unmarshal([]byte(response.Body.String()), &parsedBody)
 		if err != nil {
@@ -88,7 +89,7 @@ func TestPost(t *testing.T) {
 			panic(err)
 		}
 
-		assert.IsType(t, parsedBody, TokenResponse{}, "Should return token")
+		assert.IsType(t, parsedBody, tokenResponse{}, "Should return token")
 	}
 	ok()
 
@@ -114,7 +115,7 @@ func TestPost(t *testing.T) {
 	duplicateUser()
 
 	invalidParameters := func() {
-		log.Println("Invalid Paramenters Test")
+		log.Println("Invalid Parameters Test")
 		userData := new(postgres.User)
 		body, _ := json.Marshal(userData)
 		request, _ := http.NewRequest("POST", "/profile", bytes.NewBuffer(body))
